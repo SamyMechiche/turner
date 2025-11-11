@@ -1,0 +1,262 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block stylesheets %}
+<style>
+    @font-face {
+        font-family: jeju;
+        src: url("fonts/jeju/JejuMyeongjo-Regular.ttf");
+    }
+
+    :root {
+        --color-bg: #FBF3D1;
+        --color-border: #D4C5A9;
+        --color-text: #8B7355;
+        --color-heading: #463F33;
+        --color-button-dark: #463F33;
+        --color-button-text: #FBF3D1;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background-color: var(--color-bg);
+        font-family: serif;
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+        margin-top: 3rem;
+    }
+
+    .register-container {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .back-arrow {
+        position: absolute;
+        left: 0;
+        cursor: pointer;
+        font-size: 2rem;
+        color: var(--color-heading);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+    }
+
+    .back-arrow:hover {
+        opacity: 0.7;
+    }
+
+    .register-title {
+        flex: 1;
+        text-align: center;
+        font-family: jeju, serif;
+        font-size: 2rem;
+        color: var(--color-heading);
+        font-weight: normal;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: none;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"] {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--color-border);
+        border-radius: 8px;
+        background-color: var(--color-bg);
+        font-size: 1rem;
+        color: var(--color-text);
+        font-family: jeju, serif;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    /* Some custom fonts (like Jeju) do not render the password bullet glyph.
+       Force a safe fallback font for password inputs while keeping placeholders styled the same. */
+    .form-group input[type="password"] {
+        font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group input[type="email"]:focus,
+    .form-group input[type="password"]:focus {
+        border-color: var(--color-heading);
+    }
+
+    .form-group input::placeholder {
+        color: var(--color-text);
+        opacity: 0.7;
+    }
+
+    .password-note {
+        font-size: 0.875rem;
+        color: var(--color-text);
+        margin-top: 0.5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+    }
+
+    .form-errors {
+        color: #d32f2f;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+    }
+
+    .alert {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        background-color: #ffebee;
+        color: #d32f2f;
+        font-size: 0.875rem;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        background-color: var(--color-button-dark);
+        color: var(--color-button-text);
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: jeju, serif;
+        cursor: pointer;
+        transition: 
+            background-color 0.2s, 
+            color 0.2s, 
+            border 0.2s, 
+            opacity 0.2s;
+    }
+    .btn-submit:hover {
+        background-color: var(--color-button-text);
+        color: var(--color-button-dark);
+        border: 2px solid var(--color-button-dark);
+    }
+
+    .btn-submit:hover {
+        opacity: 0.9;
+    }
+
+    .btn-submit:active {
+        opacity: 0.8;
+    }
+
+    .btn-login {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        background-color: transparent;
+        color: var(--color-text);
+        border: 2px solid var(--color-border);
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: jeju, serif;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-login:hover {
+        border-color: var(--color-heading);
+        color: var(--color-heading);
+    }
+
+    /* Hide the agreeTerms checkbox */
+    .form-group input[type="checkbox"] {
+        display: none;
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 1.5rem 1rem;
+        }
+
+        .register-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="register-container">
+    <div class="header">
+        <a href="{{ path('app_home') }}" class="back-arrow" aria-label="Back">←</a>
+        <h1 class="register-title">Register</h1>
+    </div>
+
+    {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="alert" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+
+    {% if registrationForm.vars.errors|length > 0 %}
+        <div class="form-errors">
+            {{ form_errors(registrationForm) }}
+        </div>
+    {% endif %}
+
+    {{ form_start(registrationForm, {'attr': {'class': 'registration-form'}}) }}
+        <div class="form-group">
+            {{ form_widget(registrationForm.fname, {'attr': {'placeholder': 'First Name'}}) }}
+            {{ form_errors(registrationForm.fname) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_widget(registrationForm.lname, {'attr': {'placeholder': 'Last Name'}}) }}
+            {{ form_errors(registrationForm.lname) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_widget(registrationForm.username, {'attr': {'placeholder': 'Username'}}) }}
+            {{ form_errors(registrationForm.username) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_widget(registrationForm.email, {'attr': {'placeholder': 'Email'}}) }}
+            {{ form_errors(registrationForm.email) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_widget(registrationForm.plainPassword, {'attr': {'placeholder': 'Password*'}}) }}
+            {{ form_errors(registrationForm.plainPassword) }}
+            <div class="password-note">*must contain at least 6 characters</div>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn-submit">Submit</button>
+            <a href="{{ path('app_login') }}" class="btn-login">Login</a>
+        </div>
+    {{ form_end(registrationForm) }}
+</div>
+{% endblock %}

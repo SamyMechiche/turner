@@ -1,0 +1,177 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello HomeController!{% endblock %}
+
+{% block body %}
+<style>
+:root {
+        --font-title: outfitR;
+        --font-main: jeju, serif;
+        --color-bg: #FBF3D1;
+        --color-heading: #463F33;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    @font-face {
+        font-family: jeju;
+        src: url("fonts/jeju/JejuMyeongjo-Regular.ttf");
+    }
+
+    @font-face {
+        font-family: outfitR;
+        src: url("fonts/outfit/Outfit-Regular.ttf");
+    }
+
+    .bg {
+        height: 100vh;
+        background-color: var(--color-bg);
+        padding: 5rem 2rem;
+    }
+
+    h1 {
+        font-family: var(--font-title);
+        color: var(--color-heading);
+        font-size: 3rem;
+    }
+
+    p {
+        color: var(--color-heading);
+    }
+
+    span {
+        font-family: var(--font-title);
+    }
+
+    blockquote p {
+        font-family: jeju;
+        font-size: 2.5rem;
+        margin-top: 2rem;
+    }
+
+    section>p {
+        font-family: jeju;
+        font-size: 2.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .description {
+        background-color: #F2EACB;
+        padding: 0.7rem;
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-family: var(--font-title);
+        color: var(--color-heading);
+        font-size: 2.5rem;
+    }
+    ol {
+        margin-top: 3rem;
+    }
+
+    ol>div {
+        width: 100%;
+        padding: 0.2rem;
+        border-bottom: 2px solid #463F33;
+    }
+
+    ol>div>li {
+        font-family: var(--font-title);
+        font-size: 1.2rem;
+        color: var(--color-heading);
+    }
+
+    ul li {
+        list-style-type: none;
+    }
+
+    ul {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5rem;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    .btnR {
+        background-color: var(--color-heading);
+        padding: 0.7rem;
+        border-radius: 10%;
+        font-size: 1.5rem;
+        color: #F2EACB;
+        transition: background 0.3s, color 0.3s, border 0.3s;
+    }
+    .btnL {
+        background-color: var(--color-bg);
+        border: 2px solid var(--color-heading);
+        padding: 0.6rem;
+        border-radius: 10%;
+        font-size: 1.5rem;
+        color: #463F33;
+        transition: background 0.3s, color 0.3s, border 0.3s;
+    }
+    .btnR:hover {
+        background-color: var(--color-bg);
+        color: var(--color-heading);
+        border: 2px solid var(--color-heading);
+    }
+    .btnL:hover {
+        background-color: var(--color-heading);
+        color: #F2EACB;
+        border: 2px solid var(--color-heading);
+    }
+</style>
+
+    <div class="bg">
+        <header>
+            <h1>
+                Welcome
+            </h1>
+        </header>
+        <main>
+            <section aria-labelledby="intro">
+                <blockquote id="intro">
+                    <p>“Tired of never <br> finishing your <br> books”</p>
+                </blockquote>
+
+                <p>
+                    Try <strong><span>Turner</span></strong>
+                </p>
+
+                <p class="description">
+                    Define clear <strong>reading</strong> objectives to help you keep track of your readings
+                </p>
+            </section>
+
+            <section aria-labelledby="steps">
+                <ol>
+                    <div>
+                        <li><strong>Set goals</strong></li>
+                    </div>
+                    <div>
+                        <li><strong>Keep track</strong></li>
+                    </div>
+                    <div>
+                        <li><strong>Don’t stop</strong></li>
+                    </div>
+                </ol>
+            </section>
+        </main>
+        <footer>
+            <div>
+                <nav aria-label="User actions">
+                    <ul>
+                        <li><a href="/register" class="btnR">Register</a></li>
+                        <li><a href="/login" class="btnL">Login</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </footer>
+    </div>
+{% endblock %}

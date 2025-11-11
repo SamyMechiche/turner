@@ -1,0 +1,247 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Login{% endblock %}
+
+{% block stylesheets %}
+<style>
+    @font-face {
+        font-family: jeju;
+        src: url("fonts/jeju/JejuMyeongjo-Regular.ttf");
+    }
+
+    :root {
+        --color-bg: #FBF3D1;
+        --color-border: #D4C5A9;
+        --color-text: #8B7355;
+        --color-heading: #463F33;
+        --color-button-dark: #463F33;
+        --color-button-text: #FBF3D1;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background-color: var(--color-bg);
+        font-family: serif;
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+        margin-top: 3rem;
+    }
+
+    .login-container {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .back-arrow {
+        position: absolute;
+        left: 0;
+        cursor: pointer;
+        font-size: 2rem;
+        color: var(--color-heading);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+    }
+
+    .back-arrow:hover {
+        opacity: 0.7;
+    }
+
+    .login-title {
+        flex: 1;
+        text-align: center;
+        font-family: jeju, serif;
+        font-size: 2rem;
+        color: var(--color-heading);
+        font-weight: normal;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: none;
+    }
+
+    .form-group input[type="email"]{
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--color-border);
+        border-radius: 8px;
+        background-color: var(--color-bg);
+        font-size: 1rem;
+        color: var(--color-text);
+        font-family: jeju, serif;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .form-group input[type="password"]{
+                width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--color-border);
+        border-radius: 8px;
+        background-color: var(--color-bg);
+        font-size: 1rem;
+        color: var(--color-text);
+        font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input[type="email"]:focus,
+    .form-group input[type="password"]:focus {
+        border-color: var(--color-heading);
+    }
+
+    .form-group input::placeholder {
+        color: var(--color-text);
+        opacity: 0.7;
+    }
+
+    .form-errors {
+        color: #d32f2f;
+        margin-bottom: 1rem;
+        font-size: 0.875rem;
+    }
+
+    .alert {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        background-color: #ffebee;
+        color: #d32f2f;
+        font-size: 0.875rem;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        background-color: var(--color-button-dark);
+        color: var(--color-button-text);
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: jeju, serif;
+        cursor: pointer;
+        transition: 
+            background-color 0.2s, 
+            color 0.2s, 
+            border 0.2s, 
+            opacity 0.2s;
+    }
+
+    .btn-submit:hover {
+        background-color: var(--color-button-text);
+        color: var(--color-button-dark);
+        border: 2px solid var(--color-button-dark);
+    }
+
+    .btn-submit:active {
+        opacity: 0.8;
+    }
+
+    .btn-register {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        background-color: transparent;
+        color: var(--color-text);
+        border: 2px solid var(--color-border);
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: jeju, serif;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-register:hover {
+        border-color: var(--color-heading);
+        color: var(--color-heading);
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 1.5rem 1rem;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="login-container">
+    <div class="header">
+        <a href="{{ path('app_home') }}" class="back-arrow" aria-label="Back">←</a>
+        <h1 class="login-title">Login</h1>
+    </div>
+
+    {% if error %}
+        <div class="alert" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    {% if app.user %}
+        <div class="alert" role="alert">
+            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
+        </div>
+    {% endif %}
+
+    <form method="post" class="login-form">
+        <div class="form-group">
+            <input 
+                type="email" 
+                value="{{ last_username }}" 
+                name="_username" 
+                id="username" 
+                placeholder="Email"
+                autocomplete="email" 
+                required 
+                autofocus>
+        </div>
+
+        <div class="form-group">
+            <input 
+                type="password" 
+                name="_password" 
+                id="password" 
+                placeholder="Password"
+                autocomplete="current-password" 
+                required>
+        </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <div class="button-group">
+            <button type="submit" class="btn-submit">Submit</button>
+            <a href="{{ path('app_register') }}" class="btn-register">Register</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
