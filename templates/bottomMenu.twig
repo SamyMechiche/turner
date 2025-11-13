@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        {% block stylesheets %}
+        {% endblock %}
+
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body>
+        {% block body %}{% endblock %}
+                <nav class="bottom-menu">
+            <a href="{{ path('app_logged_home') }}">
+                <img src="/img/icones/house-solid-full.svg" class="menu-icon" alt="Home icon">
+            </a>
+            <a href="{{path('app_home')}}">
+                <img src="/img/icones/book-solid-full.svg" class="menu-icon" alt="book icon">
+            </a>
+            <a href="{{path('app_home')}}">
+                <img src="/img/icones/chart-simple-solid-full.svg" class="menu-icon" alt="chart icon">
+            <a href="{{path('app_home')}}">
+                <img src="/img/icones/plus-solid-full.svg" class="menu-icon" alt="plus icon">
+            </a>
+        </nav>
+    </body>
+</html>
+
+<style>
+/* =======================
+   3. BOTTOM MENU (NAVIGATION)
+   ======================= */
+   :root {
+        --font-title: outfitR;
+        --font-main: jeju, serif;
+        --color-bg: #FBF3D1;
+        --color-heading: #463F33;
+    }
+.bottom-menu { 
+    position: fixed; 
+    left: 0; 
+    right: 0; 
+    bottom: 2rem; 
+    width: 70%; 
+    margin: 0 auto; 
+    /* Use root colors for background and border */
+    background: var(--color-heading);
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center; 
+    padding: 1rem 0; 
+    z-index: 1000; 
+    transition: opacity 0.3s ease; 
+    opacity: 1; 
+    border-radius: 12px; 
+    border: 1px solid var(--color-heading); 
+    pointer-events: auto; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+}
+
+/* Use color from root vars */
+.bottom-menu a { 
+    color: var(--color-bg); 
+    text-decoration: none;
+    font-size: 1rem; 
+    display: flex;
+    align-items: center;
+}
+
+/* No color to change here */
+.menu-icon { 
+    width: 2em; 
+    height: 2em; 
+    display: block; 
+    margin-bottom: 0.2em; 
+}
+
+/* Hover color also from root */
+.bottom-menu a:hover { 
+    color: var(--color-bg); 
+    transition: 0.2s ease-in-out; 
+}
+
+.bottom-menu.hide { 
+    opacity: 0; 
+    pointer-events: none; 
+}
+</style>

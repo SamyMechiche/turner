@@ -18,6 +18,11 @@ class SecurityController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        // If there is no error and the user is fully authenticated, redirect
+        if (!$error && $this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            return $this->redirectToRoute('app_logged_home');
+        }
+
         return $this->render('security/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
