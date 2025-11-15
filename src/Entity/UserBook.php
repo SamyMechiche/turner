@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserBookRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserBookRepository::class)]
@@ -42,6 +44,7 @@ class UserBook
     public function __construct()
     {
         $this->notes = new ArrayCollection();
+        $this->created_at = new \DateTimeImmutable();
     }
 
     public function getId(): ?int

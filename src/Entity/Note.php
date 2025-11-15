@@ -27,6 +27,10 @@ class Note
     #[ORM\JoinColumn(nullable: false)]
     private ?UserBook $userBook = null;
 
+    public function __construct()
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -65,6 +69,18 @@ class Note
     public function setCreatedAt(\DateTimeImmutable $created_at): static
     {
         $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUserBook(): ?UserBook
+    {
+        return $this->userBook;
+    }
+
+    public function setUserBook(?UserBook $userBook): static
+    {
+        $this->userBook = $userBook;
 
         return $this;
     }

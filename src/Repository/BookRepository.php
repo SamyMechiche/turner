@@ -40,4 +40,28 @@ class BookRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * Find an existing book by title and author (case-insensitive)
+     * This helps prevent duplicate books in the database
+     */
+    public function findExistingBook(string $title, ?string $author = null): ?Book
+    {
+        // Normalize input
+        $normalizedTitle = strtolower(trim($title));
+        $normalizedAuthor = $author !== null ? strtolower(trim($author)) : null;
+
+        $qb = $this->createQueryBuilder('b')
+            ->where('LOWER(b.title) = :title')
+            ->setParameter('title', $normalizedTitle);
+
+        if ($normalizedAuthor !== null && $normalizedAuthor !== '') {
+            $qb->andWhere('(LOWER(b.author) = :author OR (b.author IS NULL AND :author IS NULL))')
+               ->setParameter('author', $normalizedAuthor);
+        } else {
+            $qb->andWhere('(b.author IS NULL OR b.author = \'\')');
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 }
