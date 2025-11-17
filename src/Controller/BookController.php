@@ -3,19 +3,28 @@
 namespace App\Controller;
 
 use App\Entity\Book;
+use App\Entity\Note;
 use App\Entity\UserBook;
 use App\Form\BookFormType;
+use App\Form\NoteFormType;
 use App\Form\UserBookFormType;
 use App\Repository\BookRepository;
 use App\Repository\UserBookRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class BookController extends AbstractController
 {
+    public function __construct(private CsrfTokenManagerInterface $csrfTokenManager)
+    {
+    }
+
     #[Route('/book/add', name: 'app_book_add')]
     public function add(
         Request $request,
@@ -112,10 +121,14 @@ class BookController extends AbstractController
 
         // Create form for setting objectives
         $form = null;
+        $noteForm = null;
         if ($userBook) {
             $form = $this->createForm(UserBookFormType::class, $userBook, [
                 'book' => $book,
                 'userBook' => $userBook,
+            ]);
+            $noteForm = $this->createForm(NoteFormType::class, new Note(), [
+                'action' => $this->generateUrl('app_book_add_note', ['id' => $book->getId()]),
             ]);
         }
 
@@ -123,6 +136,7 @@ class BookController extends AbstractController
             'book' => $book,
             'userBook' => $userBook,
             'form' => $form?->createView(),
+            'noteForm' => $noteForm?->createView(),
         ]);
     }
 
@@ -214,6 +228,134 @@ class BookController extends AbstractController
         }
 
         return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+    }
+
+    #[Route('/book/{id}/note', name: 'app_book_add_note', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function addNote(
+        int $id,
+        Request $request,
+        BookRepository $bookRepository,
+        UserBookRepository $userBookRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $book = $bookRepository->find($id);
+
+        if (!$book) {
+            throw $this->createNotFoundException('Book not found');
+        }
+
+        $user = $this->getUser();
+
+        $userBook = $userBookRepository->findOneBy([
+            'user' => $user,
+            'book' => $book,
+        ]);
+
+        if (!$userBook) {
+            $this->addFlash('error', 'This book is not in your collection yet.');
+            return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+        }
+
+        $note = new Note();
+        $form = $this->createForm(NoteFormType::class, $note);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $note->setUserBook($userBook);
+            $entityManager->persist($note);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Note added successfully!');
+        } else {
+            $this->addFlash('error', 'Could not save your note. Please try again.');
+        }
+
+        return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+    }
+
+    #[Route('/book/{id}/progress/add-daily', name: 'app_book_add_daily', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function addDailyProgress(
+        int $id,
+        Request $request,
+        BookRepository $bookRepository,
+        UserBookRepository $userBookRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(['message' => 'Invalid request.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $book = $bookRepository->find($id);
+
+        if (!$book) {
+            return new JsonResponse(['message' => 'Book not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $userBook = $userBookRepository->findOneBy([
+            'user' => $this->getUser(),
+            'book' => $book,
+        ]);
+
+        if (!$userBook) {
+            return new JsonResponse(['message' => 'Book not in collection.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $tokenValue = $request->headers->get('X-CSRF-TOKEN');
+        $token = new CsrfToken('add_daily_' . $userBook->getId(), $tokenValue);
+        if (!$this->csrfTokenManager->isTokenValid($token)) {
+            return new JsonResponse(['message' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $dailyGoal = $userBook->getDailyGoal();
+        $totalPages = $book->getTotalPages();
+
+        if (!$dailyGoal || !$totalPages) {
+            return new JsonResponse(['message' => 'Daily goal or total pages missing.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $currentPage = $userBook->getCurrentPage() ?? 0;
+        $remainingPages = max(0, $totalPages - $currentPage);
+
+        if ($totalPages > 0) {
+            $progress = ($currentPage / $totalPages) * 100;
+        } else {
+            $progress = null;
+        }
+
+        if ($remainingPages === 0) {
+            return new JsonResponse([
+                'currentPage' => $currentPage,
+                'totalPages' => $totalPages,
+                'progressPercent' => $progress !== null ? round($progress) : null,
+                'isComplete' => true,
+                'message' => 'You have already finished this book.',
+            ], Response::HTTP_OK);
+        }
+
+        $pagesToAdd = min($dailyGoal, $remainingPages);
+        $currentPage += $pagesToAdd;
+        $userBook->setCurrentPage($currentPage);
+
+        if ($totalPages > 0) {
+            $progress = ($currentPage / $totalPages) * 100;
+            $userBook->setProgress($progress);
+        } else {
+            $progress = null;
+        }
+
+        $entityManager->persist($userBook);
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'currentPage' => $currentPage,
+            'totalPages' => $totalPages,
+            'progressPercent' => $progress !== null ? round($progress) : null,
+            'isComplete' => $currentPage >= $totalPages,
+        ]);
     }
 }
 

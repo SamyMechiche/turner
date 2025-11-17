@@ -6,15 +6,16 @@
 <style>
     @font-face {
         font-family: jeju;
-        src: url("fonts/jeju/JejuMyeongjo-Regular.ttf");
+        src: url("public/fonts/jeju/JejuMyeongjo-Regular.ttf");
     }
 
     @font-face {
         font-family: outfitR;
-        src: url("fonts/outfit/Outfit-Regular.ttf");
+        src: url("public/fonts/jeju/outfit/Outfit-Regular.ttf");
     }
 
     :root {
+        --font-title: outfitR;
         --color-bg: #FBF3D1;
         --color-heading: #463F33;
         --color-border: #D4C5A9;
@@ -114,11 +115,36 @@
     }
 
     .section-title {
-        font-family: jeju, serif;
+        font-family: outfitR, sans-serif;
         font-size: 1.5rem;
         color: var(--color-heading);
         letter-spacing: 0.1rem;
         margin-bottom: 1rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .add-note-btn {
+        border: none;
+        background-color: var(--color-heading);
+        color: var(--color-bg);
+        font-family: jeju, serif;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        font-size: 0.9rem;
+    }
+
+    .add-note-btn:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
     }
 
     .progress-section {
@@ -138,7 +164,7 @@
     }
 
     .progress-label {
-        font-family: jeju, serif;
+        font-family: outfitR, sans-serif;
         font-size: 1rem;
         color: var(--color-heading);
     }
@@ -214,6 +240,103 @@
         font-style: italic;
         padding: 1rem 0;
         text-align: center;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        z-index: 1000;
+    }
+
+    .modal-overlay.is-visible {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .note-modal {
+        width: min(500px, 100%);
+        background: #fff;
+        border-radius: 16px;
+        padding: 2rem;
+        position: relative;
+        border: 2px solid var(--color-heading);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .note-modal h3 {
+        font-family: outfitR, sans-serif;
+        color: var(--color-heading);
+        margin-bottom: 1rem;
+        letter-spacing: 0.05rem;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        border: none;
+        background: transparent;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--color-heading);
+    }
+
+    .note-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        margin-bottom: 1rem;
+        font-family: jeju, serif;
+        color: var(--color-heading);
+    }
+
+    .note-form-group input,
+    .note-form-group textarea {
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-family: jeju, serif;
+        font-size: 1rem;
+        background-color: rgba(251, 243, 209, 0.4);
+    }
+
+    .note-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+
+    .modal-submit-btn {
+        border: none;
+        background-color: var(--color-heading);
+        color: var(--color-bg);
+        font-family: outfitR, sans-serif;
+        padding: 0.75rem 1.5rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .modal-submit-btn:hover {
+        opacity: 0.85;
+        transform: translateY(-1px);
+    }
+
+    .modal-cancel-btn {
+        border: none;
+        background-color: transparent;
+        color: var(--color-heading);
+        font-family: outfitR, sans-serif;
+        cursor: pointer;
+        text-decoration: underline;
     }
 
     .not-in-collection {
@@ -323,6 +446,22 @@
 
     .btn-submit:active {
         opacity: 0.8;
+    }
+
+    .add-daily-btn{
+        border: none;
+        background-color: var(--color-heading);
+        color: var(--color-bg);
+        font-family: outfitR, sans-serif;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        font-size: 0.9rem;
+    }
+    .add-daily-btn.is-complete {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 
     .form-errors {
@@ -459,12 +598,12 @@
                     <div class="progress-item">
                         <div>
                             <div class="progress-label">Current Page</div>
-                            <div class="progress-value">{{ userBook.currentPage }} / {{ book.totalPages }}</div>
+                            <div class="progress-value" id="current-page-value">{{ userBook.currentPage }} / {{ book.totalPages }}</div>
                         </div>
                     </div>
                     <div class="progress-bar-container">
                         {% set progressPercent = (userBook.currentPage / book.totalPages * 100)|round %}
-                        <div class="progress-bar" style="width: {{ progressPercent }}%"></div>
+                        <div class="progress-bar" id="progress-bar" style="width: {{ progressPercent }}%"></div>
                     </div>
                 {% else %}
                     <div class="empty-state">No progress tracked yet</div>
@@ -473,7 +612,19 @@
                 {% if userBook.dailyGoal %}
                     <div class="progress-item">
                         <span class="progress-label">Daily Goal</span>
-                        <span class="progress-value">{{ userBook.dailyGoal }} pages/day</span>
+                        <span class="progress-value" id="daily-goal-value">{{ userBook.dailyGoal }} pages/day</span>
+                        {% if userBook.currentPage is not null and book.totalPages %}
+                            <button
+                                type="button"
+                                class="add-daily-btn"
+                                id="add-daily-btn"
+                                style="margin-left:1rem;"
+                                data-add-daily-url="{{ path('app_book_add_daily', {'id': book.id}) }}"
+                                data-csrf-token="{{ csrf_token('add_daily_' ~ userBook.id) }}"
+                            >
+                                Add daily pages
+                            </button>
+                        {% endif %}
                     </div>
                 {% endif %}
 
@@ -487,15 +638,89 @@
                 {% if userBook.progress is not null %}
                     <div class="progress-item">
                         <span class="progress-label">Progress</span>
-                        <span class="progress-value">{{ userBook.progress }}%</span>
+                        <span class="progress-value" id="progress-percent-value">{{ userBook.progress|round }}%</span>
                     </div>
                 {% endif %}
             </div>
         </div>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const addDailyButton = document.getElementById('add-daily-btn');
+                if (addDailyButton) {
+                    const addDailyUrl = addDailyButton.dataset.addDailyUrl;
+                    const csrfToken = addDailyButton.dataset.csrfToken;
+                    const currentPageElem = document.getElementById('current-page-value');
+                    const progressBar = document.getElementById('progress-bar');
+                    const progressPercentElem = document.getElementById('progress-percent-value');
+
+                    addDailyButton.addEventListener('click', async function() {
+                        if (!addDailyUrl || !csrfToken || !currentPageElem || !progressBar) {
+                            return;
+                        }
+
+                        const originalLabel = addDailyButton.textContent.trim() || 'Add daily pages';
+                        addDailyButton.disabled = true;
+                        addDailyButton.textContent = 'Updating...';
+
+                        try {
+                            const response = await fetch(addDailyUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': csrfToken,
+                                },
+                                body: JSON.stringify({}),
+                            });
+
+                            const data = await response.json();
+
+                            if (!response.ok) {
+                                throw new Error(data.message || 'Unable to update progress.');
+                            }
+
+                            if (typeof data.currentPage !== 'undefined' && typeof data.totalPages !== 'undefined') {
+                                currentPageElem.textContent = data.currentPage + ' / ' + data.totalPages;
+                            }
+
+                            if (progressBar && typeof data.progressPercent === 'number') {
+                                progressBar.style.width = data.progressPercent + '%';
+                            }
+
+                            if (progressPercentElem && typeof data.progressPercent === 'number') {
+                                progressPercentElem.textContent = data.progressPercent + '%';
+                            }
+
+                            if (data.isComplete) {
+                                addDailyButton.textContent = 'Completed';
+                                addDailyButton.classList.add('is-complete');
+                            } else {
+                                addDailyButton.disabled = false;
+                                addDailyButton.textContent = originalLabel;
+                            }
+
+                            if (data.message) {
+                                console.info(data.message);
+                            }
+                        } catch (error) {
+                            alert(error.message || 'Unable to update progress. Please try again.');
+                            addDailyButton.disabled = false;
+                            addDailyButton.textContent = originalLabel;
+                        }
+                    });
+                }
+            });
+        </script>
+
         {# Notes Section #}
         <div class="section">
-            <h2 class="section-title">Your Notes</h2>
+            <div class="section-header">
+                <h2 class="section-title">Your Notes</h2>
+                {% if noteForm %}
+                    <button type="button" class="add-note-btn" id="open-note-modal">Add Note</button>
+                {% endif %}
+            </div>
             <div class="notes-container">
                 {% if userBook.notes|length > 0 %}
                     {% for note in userBook.notes %}
@@ -517,6 +742,31 @@
                     <div class="empty-state">No notes yet. Start reading to add your thoughts!</div>
                 {% endif %}
             </div>
+            {% if noteForm %}
+                <div class="modal-overlay" id="note-modal" aria-hidden="true">
+                    <div class="note-modal" role="dialog" aria-modal="true" aria-labelledby="note-modal-title">
+                        <button type="button" class="modal-close" id="close-note-modal" aria-label="Close modal">&times;</button>
+                        <h3 id="note-modal-title">Add a Note</h3>
+                        {{ form_start(noteForm, {'attr': {'id': 'note-form'}}) }}
+                        <div class="note-form-group">
+                            {{ form_label(noteForm.page) }}
+                            {{ form_widget(noteForm.page) }}
+                            {{ form_errors(noteForm.page) }}
+                        </div>
+                        <div class="note-form-group">
+                            {{ form_label(noteForm.content) }}
+                            {{ form_widget(noteForm.content) }}
+                            {{ form_errors(noteForm.content) }}
+                        </div>
+                        {{ form_rest(noteForm) }}
+                        <div class="note-form-actions">
+                            <button type="button" class="modal-cancel-btn" id="cancel-note-modal">Cancel</button>
+                            <button type="submit" class="modal-submit-btn">Save Note</button>
+                        </div>
+                        {{ form_end(noteForm, {'render_rest': false}) }}
+                    </div>
+                </div>
+            {% endif %}
         </div>
     {% else %}
         <div class="section">
@@ -535,6 +785,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const deadlineGroup = document.getElementById('deadline-group');
     const dailyGoalInput = document.querySelector('input[name="user_book_form[daily_goal]"]');
     const deadlineInput = document.querySelector('input[name="user_book_form[deadline]"]');
+    const noteModal = document.getElementById('note-modal');
+    const openNoteModalButton = document.getElementById('open-note-modal');
+    const closeNoteModalButton = document.getElementById('close-note-modal');
+    const cancelNoteModalButton = document.getElementById('cancel-note-modal');
 
     function toggleFields() {
         const selected = document.querySelector('input[name="user_book_form[objective_type]"]:checked');
@@ -558,6 +812,52 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initial state
         toggleFields();
     }
+
+    function openNoteModal() {
+        if (!noteModal) {
+            return;
+        }
+        noteModal.classList.add('is-visible');
+        noteModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        const firstInput = noteModal.querySelector('input, textarea');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 50);
+        }
+    }
+
+    function closeNoteModal() {
+        if (!noteModal) {
+            return;
+        }
+        noteModal.classList.remove('is-visible');
+        noteModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    if (noteModal && openNoteModalButton) {
+        openNoteModalButton.addEventListener('click', openNoteModal);
+    }
+
+    [closeNoteModalButton, cancelNoteModalButton].forEach(button => {
+        if (button) {
+            button.addEventListener('click', closeNoteModal);
+        }
+    });
+
+    if (noteModal) {
+        noteModal.addEventListener('click', function(event) {
+            if (event.target === noteModal) {
+                closeNoteModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && noteModal && noteModal.classList.contains('is-visible')) {
+            closeNoteModal();
+        }
+    });
 });
 </script>
 {% endblock %}
