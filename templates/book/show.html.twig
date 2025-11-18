@@ -158,7 +158,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 0.75rem;
-        background-color: rgba(255, 255, 255, 0.5);
+        background-color: #F2EACB;
         border-radius: 8px;
         border: 1px solid rgba(70, 63, 51, 0.2);
     }
@@ -360,7 +360,8 @@
     }
 
     .form-group label {
-        font-family: jeju, serif;
+        font-family: outfitR, sans-serif;
+        font-weight: bold;
         font-size: 1rem;
         color: var(--color-heading);
         display: block;
@@ -613,7 +614,8 @@
                     <div class="progress-item">
                         <span class="progress-label">Daily Goal</span>
                         <span class="progress-value" id="daily-goal-value">{{ userBook.dailyGoal }} pages/day</span>
-                        {% if userBook.currentPage is not null and book.totalPages %}
+                    </div>
+                                            {% if userBook.currentPage is not null and book.totalPages %}
                             <button
                                 type="button"
                                 class="add-daily-btn"
@@ -625,7 +627,6 @@
                                 Add daily pages
                             </button>
                         {% endif %}
-                    </div>
                 {% endif %}
 
                 {% if userBook.deadline %}

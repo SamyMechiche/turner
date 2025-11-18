@@ -1,6 +1,6 @@
 {% extends 'bottomMenu.twig' %}
 
-{% block title %}Hello LoggedHomeController!{% endblock %}
+{% block title %}My Collection{% endblock %}
 
 {% block body %}
 <style>
@@ -37,19 +37,6 @@
         color: var(--color-heading);
         font-size: 3rem;
         margin-bottom: 3rem;
-    }
-
-    .list {
-        border-top: 2px solid var(--color-heading);
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-    }
-
-    h2 {
-        font-family: outfitR, sans-serif;
-        letter-spacing: 0.175rem;
-        color: var(--color-heading);
-        margin-bottom: 1rem;
     }
 
     .books-container {
@@ -115,61 +102,59 @@
     }
 
     .empty-state {
-        font-family: var(--font-main);
+        font-family: jeju, serif;
         color: var(--color-heading);
         opacity: 0.5;
         font-style: italic;
-        padding: 1rem 0;
+        padding: 2rem 0;
+        text-align: center;
+        font-size: 1.2rem;
+    }
+
+    .collection-header {
+        margin-bottom: 2rem;
+    }
+
+    .collection-count {
+        font-family: outfitR, sans-serif;
+        font-size: 1rem;
+        color: var(--color-heading);
+        opacity: 0.7;
+        margin-top: 0.5rem;
     }
 </style>
 
- <div class="bg">
-        <h1>
-            Welcome
-            {% if app.user and app.user.username %}
-                {{ app.user.username }}
-            {% endif %}
-        </h1>
-        
-            <h2>
-                Current Readings
-            </h2>
-            <div class="list">
-        </div>
-        
-            <h2>
-                To Read
-            </h2>
-            <div class="list">
-            <div class="books-container">
-                {% if userBooks|length > 0 %}
-                    {% for userBook in userBooks %}
-                        {% set book = userBook.book %}
-                        <a href="{{ path('app_book_show', {id: book.id}) }}" style="text-decoration: none; color: inherit;">
-                            <div class="book-item">
-                                <div class="book-cover">
-                                    {% if book.coverImage %}
-                                        <img src="{{ book.coverImage }}" alt="{{ book.title }} cover">
-                                    {% else %}
-                                        <span>{{ book.title|slice(0, 3)|upper }}</span>
-                                    {% endif %}
-                                </div>
-                                <div class="book-info">
-                                    <div class="book-title">{{ book.title }}</div>
-                                </div>
-                            </div>
-                        </a>
-                    {% endfor %}
-                {% else %}
-                    <div class="empty-state">No books in your collection yet. Add one using the + button!</div>
-                {% endif %}
-            </div>
-        </div>
-        
-            <h2>
-                Finished
-            </h2>
-            <div class="list">
-        </div>
+<div class="bg">
+    <div class="collection-header">
+        <h1>My Collection</h1>
+        {% if userBooks|length > 0 %}
+            <div class="collection-count">{{ userBooks|length }} book{{ userBooks|length > 1 ? 's' : '' }}</div>
+        {% endif %}
     </div>
+    
+    <div class="books-container">
+        {% if userBooks|length > 0 %}
+            {% for userBook in userBooks %}
+                {% set book = userBook.book %}
+                <a href="{{ path('app_book_show', {id: book.id}) }}" style="text-decoration: none; color: inherit;">
+                    <div class="book-item">
+                        <div class="book-cover">
+                            {% if book.coverImage %}
+                                <img src="{{ book.coverImage }}" alt="{{ book.title }} cover">
+                            {% else %}
+                                <span>{{ book.title|slice(0, 3)|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="book-info">
+                            <div class="book-title">{{ book.title }}</div>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">No books in your collection yet. Add one using the + button!</div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
+
