@@ -113,6 +113,15 @@
 
     .collection-header {
         margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .collection-title-wrapper {
+        flex: 1;
     }
 
     .collection-count {
@@ -122,13 +131,60 @@
         opacity: 0.7;
         margin-top: 0.5rem;
     }
+
+    .sort-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .sort-label {
+        font-family: outfitR, sans-serif;
+        font-size: 0.9rem;
+        color: var(--color-heading);
+        opacity: 0.8;
+    }
+
+    .sort-select {
+        padding: 0.5rem 0.75rem;
+        border: 2px solid var(--color-heading);
+        border-radius: 8px;
+        background-color: var(--color-bg);
+        color: var(--color-heading);
+        font-family: jeju, serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: background-color 0.2s ease;
+    }
+
+    .sort-select:hover {
+        background-color: rgba(70, 63, 51, 0.05);
+    }
+
+    .sort-select:focus {
+        background-color: rgba(70, 63, 51, 0.1);
+    }
 </style>
 
 <div class="bg">
     <div class="collection-header">
-        <h1>My Collection</h1>
+        <div class="collection-title-wrapper">
+            <h1>My Collection</h1>
+            {% if userBooks|length > 0 %}
+                <div class="collection-count">{{ userBooks|length }} book{{ userBooks|length > 1 ? 's' : '' }}</div>
+            {% endif %}
+        </div>
         {% if userBooks|length > 0 %}
-            <div class="collection-count">{{ userBooks|length }} book{{ userBooks|length > 1 ? 's' : '' }}</div>
+            <div class="sort-controls">
+                <label for="sort-select" class="sort-label">Sort by:</label>
+                <select id="sort-select" class="sort-select" onchange="window.location.href='{{ path('app_collection') }}?sort=' + this.value">
+                    <option value="date_desc" {% if currentSort == 'date_desc' %}selected{% endif %}>Date Added (Newest)</option>
+                    <option value="date_asc" {% if currentSort == 'date_asc' %}selected{% endif %}>Date Added (Oldest)</option>
+                    <option value="name_asc" {% if currentSort == 'name_asc' %}selected{% endif %}>Title (A-Z)</option>
+                    <option value="name_desc" {% if currentSort == 'name_desc' %}selected{% endif %}>Title (Z-A)</option>
+                </select>
+            </div>
         {% endif %}
     </div>
     

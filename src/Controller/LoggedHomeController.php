@@ -27,8 +27,34 @@ final class LoggedHomeController extends AbstractController
             ->getQuery()
             ->getResult();
 
+        // Categorize books based on daily_goal and completion status
+        $currentReadings = [];
+        $toRead = [];
+        $finished = [];
+
+        foreach ($userBooks as $userBook) {
+            $book = $userBook->getBook();
+            $currentPage = $userBook->getCurrentPage() ?? 0;
+            $totalPages = $book->getTotalPages() ?? 0;
+            $dailyGoal = $userBook->getDailyGoal() ?? 0;
+            $progress = $userBook->getProgress() ?? 0;
+
+            // Check if book is finished (100% progress or current_page >= total_pages)
+            if ($totalPages > 0 && ($progress >= 100 || $currentPage >= $totalPages)) {
+                $finished[] = $userBook;
+            } elseif ($dailyGoal > 0) {
+                // Book has objectives set (daily_goal > 0) - move to Current Readings
+                $currentReadings[] = $userBook;
+            } else {
+                // Book has no objectives set - stays in To Read
+                $toRead[] = $userBook;
+            }
+        }
+
         return $this->render('logged_home/index.html.twig', [
-            'userBooks' => $userBooks,
+            'currentReadings' => $currentReadings,
+            'toRead' => $toRead,
+            'finished' => $finished,
         ]);
     }
 }

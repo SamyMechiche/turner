@@ -135,41 +135,87 @@
                 Current Readings
             </h2>
             <div class="list">
-        </div>
+                <div class="books-container">
+                    {% if currentReadings|length > 0 %}
+                        {% for userBook in currentReadings %}
+                            {% set book = userBook.book %}
+                            <a href="{{ path('app_book_show', {id: book.id}) }}" style="text-decoration: none; color: inherit;">
+                                <div class="book-item">
+                                    <div class="book-cover">
+                                        {% if book.coverImage %}
+                                            <img src="{{ book.coverImage }}" alt="{{ book.title }} cover">
+                                        {% else %}
+                                            <span>{{ book.title|slice(0, 3)|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="book-info">
+                                        <div class="book-title">{{ book.title }}</div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">No books in progress. Set objectives on your books to start tracking!</div>
+                    {% endif %}
+                </div>
+            </div>
         
             <h2>
                 To Read
             </h2>
             <div class="list">
-            <div class="books-container">
-                {% if userBooks|length > 0 %}
-                    {% for userBook in userBooks %}
-                        {% set book = userBook.book %}
-                        <a href="{{ path('app_book_show', {id: book.id}) }}" style="text-decoration: none; color: inherit;">
-                            <div class="book-item">
-                                <div class="book-cover">
-                                    {% if book.coverImage %}
-                                        <img src="{{ book.coverImage }}" alt="{{ book.title }} cover">
-                                    {% else %}
-                                        <span>{{ book.title|slice(0, 3)|upper }}</span>
-                                    {% endif %}
+                <div class="books-container">
+                    {% if toRead|length > 0 %}
+                        {% for userBook in toRead %}
+                            {% set book = userBook.book %}
+                            <a href="{{ path('app_book_show', {id: book.id}) }}" style="text-decoration: none; color: inherit;">
+                                <div class="book-item">
+                                    <div class="book-cover">
+                                        {% if book.coverImage %}
+                                            <img src="{{ book.coverImage }}" alt="{{ book.title }} cover">
+                                        {% else %}
+                                            <span>{{ book.title|slice(0, 3)|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="book-info">
+                                        <div class="book-title">{{ book.title }}</div>
+                                    </div>
                                 </div>
-                                <div class="book-info">
-                                    <div class="book-title">{{ book.title }}</div>
-                                </div>
-                            </div>
-                        </a>
-                    {% endfor %}
-                {% else %}
-                    <div class="empty-state">No books in your collection yet. Add one using the + button!</div>
-                {% endif %}
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">No books to read. Add one using the + button!</div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
         
             <h2>
                 Finished
             </h2>
             <div class="list">
-        </div>
+                <div class="books-container">
+                    {% if finished|length > 0 %}
+                        {% for userBook in finished %}
+                            {% set book = userBook.book %}
+                            <a href="{{ path('app_book_show', {id: book.id}) }}" style="text-decoration: none; color: inherit;">
+                                <div class="book-item">
+                                    <div class="book-cover">
+                                        {% if book.coverImage %}
+                                            <img src="{{ book.coverImage }}" alt="{{ book.title }} cover">
+                                        {% else %}
+                                            <span>{{ book.title|slice(0, 3)|upper }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="book-info">
+                                        <div class="book-title">{{ book.title }}</div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">No finished books yet. Keep reading!</div>
+                    {% endif %}
+                </div>
+            </div>
     </div>
 {% endblock %}

@@ -9,6 +9,7 @@ use App\Form\BookFormType;
 use App\Form\NoteFormType;
 use App\Form\UserBookFormType;
 use App\Repository\BookRepository;
+use App\Repository\NoteRepository;
 use App\Repository\UserBookRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -356,6 +357,125 @@ class BookController extends AbstractController
             'progressPercent' => $progress !== null ? round($progress) : null,
             'isComplete' => $currentPage >= $totalPages,
         ]);
+    }
+
+    #[Route('/book/{id}/note/{noteId}/delete', name: 'app_book_delete_note', requirements: ['id' => '\d+', 'noteId' => '\d+'], methods: ['POST'])]
+    public function deleteNote(
+        int $id,
+        int $noteId,
+        Request $request,
+        BookRepository $bookRepository,
+        NoteRepository $noteRepository,
+        UserBookRepository $userBookRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $book = $bookRepository->find($id);
+
+        if (!$book) {
+            throw $this->createNotFoundException('Book not found');
+        }
+
+        $user = $this->getUser();
+
+        // Find the UserBook relationship to ensure user owns this book
+        $userBook = $userBookRepository->findOneBy([
+            'user' => $user,
+            'book' => $book,
+        ]);
+
+        if (!$userBook) {
+            $this->addFlash('error', 'This book is not in your collection.');
+            return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+        }
+
+        // Find the note
+        $note = $noteRepository->find($noteId);
+
+        if (!$note) {
+            $this->addFlash('error', 'Note not found.');
+            return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+        }
+
+        // Verify the note belongs to this user's UserBook
+        if ($note->getUserBook() !== $userBook) {
+            $this->addFlash('error', 'You do not have permission to delete this note.');
+            return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+        }
+
+        // CSRF protection
+        $tokenValue = $request->request->get('_token');
+        $token = new CsrfToken('delete_note_' . $noteId, $tokenValue);
+        if (!$this->csrfTokenManager->isTokenValid($token)) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+        }
+
+        // Delete the note
+        $entityManager->remove($note);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Note deleted successfully!');
+        return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+    }
+
+    #[Route('/book/{id}/remove', name: 'app_book_remove', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function removeFromCollection(
+        int $id,
+        Request $request,
+        BookRepository $bookRepository,
+        UserBookRepository $userBookRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $book = $bookRepository->find($id);
+
+        if (!$book) {
+            throw $this->createNotFoundException('Book not found');
+        }
+
+        $user = $this->getUser();
+
+        // Find the UserBook relationship
+        $userBook = $userBookRepository->findOneBy([
+            'user' => $user,
+            'book' => $book,
+        ]);
+
+        if (!$userBook) {
+            $this->addFlash('error', 'This book is not in your collection.');
+            return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+        }
+
+        // CSRF protection
+        $tokenValue = $request->request->get('_token');
+        $token = new CsrfToken('remove_book_' . $id, $tokenValue);
+        if (!$this->csrfTokenManager->isTokenValid($token)) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('app_book_show', ['id' => $book->getId()]);
+        }
+
+        // Delete the UserBook relationship (this will also delete all notes due to orphanRemoval)
+        $entityManager->remove($userBook);
+        $entityManager->flush();
+
+        // Check if there are any other UserBook relationships for this book
+        $otherUserBooks = $userBookRepository->createQueryBuilder('ub')
+            ->where('ub.book = :book')
+            ->setParameter('book', $book)
+            ->getQuery()
+            ->getResult();
+
+        // If no other users have this book, delete the Book entity as well
+        if (empty($otherUserBooks)) {
+            $entityManager->remove($book);
+            $entityManager->flush();
+        }
+
+        $this->addFlash('success', 'Book removed from your collection successfully!');
+        return $this->redirectToRoute('app_logged_home');
     }
 }
 

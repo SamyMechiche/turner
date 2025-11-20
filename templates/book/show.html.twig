@@ -211,6 +211,12 @@
         margin-bottom: 0.5rem;
     }
 
+    .note-header-left {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
     .note-page {
         font-family: jeju, serif;
         font-size: 0.9rem;
@@ -223,6 +229,30 @@
         font-size: 0.85rem;
         color: var(--color-heading);
         opacity: 0.6;
+    }
+
+    .delete-note-btn {
+        border: none;
+        background-color: transparent;
+        color: var(--color-heading);
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-family: outfitR, sans-serif;
+        opacity: 0.6;
+        transition: opacity 0.2s ease, background-color 0.2s ease;
+    }
+
+    .delete-note-btn:hover {
+        opacity: 1;
+        background-color: rgba(212, 63, 51, 0.1);
+        color: #d43f33;
+    }
+
+    .delete-note-form {
+        display: inline;
+        margin: 0;
     }
 
     .note-content {
@@ -387,6 +417,14 @@
         border-color: var(--color-heading);
     }
 
+    .form-group input[type="number"]:disabled,
+    .form-group input[type="date"]:disabled {
+        background-color: rgba(212, 197, 169, 0.3);
+        cursor: not-allowed;
+        opacity: 0.6;
+        color: rgba(70, 63, 51, 0.5);
+    }
+
     .form-radio-group {
         display: flex;
         gap: 1.5rem;
@@ -459,6 +497,7 @@
         cursor: pointer;
         transition: opacity 0.2s ease, transform 0.2s ease;
         font-size: 0.9rem;
+        margin-left: 1rem;
     }
     .add-daily-btn.is-complete {
         opacity: 0.6;
@@ -488,6 +527,35 @@
     .alert-error {
         background-color: #ffebee;
         color: #d32f2f;
+    }
+
+    .book-info-header {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .remove-book-btn {
+        border: none;
+        background-color: transparent;
+        color: #d43f33;
+        font-family: outfitR, sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .remove-book-btn:hover {
+        background-color: rgba(212, 63, 51, 0.1);
+    }
+
+    .remove-book-form {
+        display: inline;
+        margin: 0;
     }
 </style>
 {% endblock %}
@@ -620,7 +688,6 @@
                                 type="button"
                                 class="add-daily-btn"
                                 id="add-daily-btn"
-                                style="margin-left:1rem;"
                                 data-add-daily-url="{{ path('app_book_add_daily', {'id': book.id}) }}"
                                 data-csrf-token="{{ csrf_token('add_daily_' ~ userBook.id) }}"
                             >
@@ -727,12 +794,23 @@
                     {% for note in userBook.notes %}
                         <div class="note-item">
                             <div class="note-header">
-                                {% if note.page %}
-                                    <span class="note-page">Page {{ note.page }}</span>
-                                {% else %}
-                                    <span class="note-page">General Note</span>
-                                {% endif %}
-                                <span class="note-date">{{ note.createdAt|date('M d, Y') }}</span>
+                                <div class="note-header-left">
+                                    {% if note.page %}
+                                        <span class="note-page">Page {{ note.page }}</span>
+                                    {% else %}
+                                        <span class="note-page">General Note</span>
+                                    {% endif %}
+                                    <span class="note-date">{{ note.createdAt|date('M d, Y') }}</span>
+                                </div>
+                                <form 
+                                    method="post" 
+                                    action="{{ path('app_book_delete_note', {id: book.id, noteId: note.id}) }}" 
+                                    class="delete-note-form"
+                                    onsubmit="return confirm('Are you sure you want to delete this note?');"
+                                >
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_note_' ~ note.id) }}">
+                                    <button type="submit" class="delete-note-btn" title="Delete note">Delete</button>
+                                </form>
                             </div>
                             {% if note.content %}
                                 <div class="note-content">{{ note.content }}</div>
@@ -777,6 +855,20 @@
             </div>
         </div>
     {% endif %}
+            {# Remove from Collection Section #}
+        <div class="remove-book-section">
+            <form 
+                method="post" 
+                action="{{ path('app_book_remove', {id: book.id}) }}" 
+                class="remove-book-form"
+                onsubmit="return confirm('Are you sure you want to remove this book from your collection? All your notes and progress for this book will be deleted.');"
+            >
+                <input type="hidden" name="_token" value="{{ csrf_token('remove_book_' ~ book.id) }}">
+                <button type="submit" class="remove-book-btn" title="Remove book from collection">
+                    Remove from Collection
+                </button>
+            </form>
+        </div>
 </div>
 
 <script>
@@ -793,15 +885,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function toggleFields() {
         const selected = document.querySelector('input[name="user_book_form[objective_type]"]:checked');
-        if (selected && dailyGoalGroup && deadlineGroup) {
+        if (selected) {
             if (selected.value === 'daily_goal') {
-                dailyGoalGroup.style.display = 'block';
-                deadlineGroup.style.display = 'none';
-                if (deadlineInput) deadlineInput.value = '';
-            } else {
-                dailyGoalGroup.style.display = 'none';
-                deadlineGroup.style.display = 'block';
-                if (dailyGoalInput) dailyGoalInput.value = '';
+                // Enable daily goal input, disable deadline input
+                if (dailyGoalInput) {
+                    dailyGoalInput.disabled = false;
+                    dailyGoalInput.removeAttribute('readonly');
+                }
+                if (deadlineInput) {
+                    deadlineInput.disabled = true;
+                    deadlineInput.value = '';
+                }
+            } else if (selected.value === 'deadline') {
+                // Enable deadline input, disable daily goal input
+                if (deadlineInput) {
+                    deadlineInput.disabled = false;
+                    deadlineInput.removeAttribute('readonly');
+                }
+                if (dailyGoalInput) {
+                    dailyGoalInput.disabled = true;
+                    dailyGoalInput.value = '';
+                }
             }
         }
     }
