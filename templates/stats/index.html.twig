@@ -1,0 +1,323 @@
+{% extends 'bottomMenu.twig' %}
+
+{% block title %}Turner | Reading Stats{% endblock %}
+
+{% block stylesheets %}
+<style>
+    @font-face {
+        font-family: jeju;
+        src: url("fonts/jeju/JejuMyeongjo-Regular.ttf");
+    }
+    @font-face {
+        font-family: outfitR;
+        src: url("fonts/outfit/Outfit-Regular.ttf");
+    }
+
+    :root {
+        --color-bg: #FBF3D1;
+        --color-border: #D4C5A9;
+        --color-text: #8B7355;
+        --color-heading: #463F33;
+        --color-card: #fff9e6;
+        --color-highlight: #ffe4b5;
+    }
+
+    body {
+        background-color: var(--color-bg);
+        font-family: jeju, serif;
+        min-height: 100vh;
+        padding: 2rem 1.5rem 8rem 1.5rem;
+    }
+
+    .stats-container {
+        max-width: 960px;
+        margin: 0 auto 4rem auto;
+        color: var(--color-heading);
+    }
+
+    .stats-hero {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .stats-hero h1 {
+        font-size: 2.5rem;
+        font-family: outfitR, sans-serif; 
+        font-weight: normal;
+        text-transform: capitalize;
+    }
+
+    .stats-hero p {
+        color: var(--color-text);
+        margin-top: 0.5rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stats-card {
+        background: var(--color-card);
+        border: 2px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 25px rgba(70, 63, 51, 0.08);
+    }
+
+    .stats-card h3 {
+        font-size: 1rem;
+        color: var(--color-text);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-card .value {
+        font-size: 2rem;
+        font-weight: normal;
+        color: var(--color-heading);
+    }
+
+    .stats-card small {
+        display: block;
+        margin-top: 0.5rem;
+        color: var(--color-text);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        margin: 2rem 0 1rem;
+    }
+
+    .progress-buckets,
+    .timeline,
+    .deadlines,
+    .books-month {
+        background: var(--color-card);
+        border: 2px solid var(--color-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 18px rgba(70, 63, 51, 0.05);
+    }
+
+    .progress-buckets ul,
+    .timeline ul,
+    .deadlines ul,
+    .books-month ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .progress-buckets li,
+    .timeline li,
+    .deadlines li,
+    .books-month li {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed var(--color-border);
+    }
+
+    .progress-buckets li:last-child,
+    .timeline li:last-child,
+    .deadlines li:last-child,
+    .books-month li:last-child {
+        border-bottom: none;
+    }
+
+    .funfact-card {
+        margin-top: 2rem;
+        background: var(--color-heading);
+        color: var(--color-bg);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .funfact-card h2 {
+        margin-bottom: 0.5rem;
+        font-size: 1.4rem;
+    }
+
+    .dual-column {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .deadlines .tag {
+        background: var(--color-highlight);
+        color: var(--color-heading);
+        padding: 0.1rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+
+    .legend {
+        color: var(--color-text);
+        font-size: 0.95rem;
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+        body {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .stats-hero h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="stats-container">
+    <div class="stats-hero">
+        <h1>{{ user.username }}'s Reading Pulse</h1>
+        <p>{{ stats.funFact }}</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stats-card">
+            <h3>Total Books</h3>
+            <div class="value">{{ stats.totals.books }}</div>
+            <small>{{ stats.progress.completionRate }}% finished</small>
+        </div>
+        <div class="stats-card">
+            <h3>Pages Read</h3>
+            <div class="value">{{ stats.pages.read }}</div>
+            <small>{{ stats.pages.remaining }} pages remain</small>
+        </div>
+        <div class="stats-card">
+            <h3>Current Reads</h3>
+            <div class="value">{{ stats.totals.currentReads }}</div>
+            <small>{{ stats.totals.completed }} completed</small>
+        </div>
+        <div class="stats-card">
+            <h3>Daily Drive</h3>
+            <div class="value">{{ stats.pages.dailyGoalTotal ?: '–' }}</div>
+            <small>pages targeted per day</small>
+        </div>
+        <div class="stats-card">
+            <h3>Favorite Author</h3>
+            <div class="value">
+                {{ stats.totals.favoriteAuthor ? stats.totals.favoriteAuthor.name : 'TBD' }}
+            </div>
+            <small>
+                {% if stats.totals.favoriteAuthor %}
+                    Appears in {{ stats.totals.favoriteAuthor.count }} books
+                {% else %}
+                    Keep adding books to crown a favorite!
+                {% endif %}
+            </small>
+        </div>
+        <div class="stats-card">
+            <h3>Speed Score</h3>
+            <div class="value">{{ stats.speedScore }}</div>
+            <small>average pages per day</small>
+        </div>
+    </div>
+
+    <h2 class="section-title">Progress Breakdown</h2>
+    <div class="progress-buckets">
+        <ul>
+            {% for label, value in stats.progress.buckets %}
+                <li>
+                    <span>{{ label }}</span>
+                    <strong>{{ value }} book{{ value == 1 ? '' : 's' }}</strong>
+                </li>
+            {% endfor %}
+        </ul>
+        <p class="legend">Average progress: {{ stats.progress.average }}%</p>
+    </div>
+
+    <div class="dual-column">
+        <div class="timeline">
+            <h2 class="section-title">Reading Timeline</h2>
+            <ul>
+                <li>
+                    <span>Reading since</span>
+                    <strong>
+                        {{ stats.timeline.readingSince ? stats.timeline.readingSince|date('F j, Y') : '—' }}
+                    </strong>
+                </li>
+                <li>
+                    <span>Days active</span>
+                    <strong>{{ stats.timeline.daysActive }}</strong>
+                </li>
+                <li>
+                    <span>Average pages/book</span>
+                    <strong>{{ stats.totals.averagePages }}</strong>
+                </li>
+                <li>
+                    <span>Longest book conquered</span>
+                    <strong>
+                        {% if stats.totals.longestBook %}
+                            {{ stats.totals.longestBook.title }} ({{ stats.totals.longestBook.pages }} pages)
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+                </li>
+                <li>
+                    <span>Shortest vibe</span>
+                    <strong>
+                        {% if stats.totals.shortestBook %}
+                            {{ stats.totals.shortestBook.title }} ({{ stats.totals.shortestBook.pages }} pages)
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+                </li>
+            </ul>
+        </div>
+
+        <div class="deadlines">
+            <h2 class="section-title">Upcoming Deadlines</h2>
+            {% if stats.deadlines %}
+                <ul>
+                    {% for goal in stats.deadlines %}
+                        <li>
+                            <span>{{ goal.title }}</span>
+                            <span class="tag">{{ goal.deadline|date('M d') }} · {{ goal.remaining }} days left</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No looming deadlines — set one in a book to kick things up!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <h2 class="section-title">Books Added Per Month</h2>
+    <div class="books-month">
+        {% if stats.timeline.booksByMonth %}
+            <ul>
+                {% for month in stats.timeline.booksByMonth|slice(-6) %}
+                    <li>
+                        <span>{{ month.label }}</span>
+                        <strong>{{ month.count }}</strong>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No books logged yet — the first one is the hardest!</p>
+        {% endif %}
+    </div>
+
+    <div class="funfact-card">
+        <h2>Bonus Mood</h2>
+        <p>{{ stats.progress.completionRate >= 60 ? 'Your library is thriving!' : 'Plenty of room for new adventures.' }}</p>
+    </div>
+</div>
+{% endblock %}
+

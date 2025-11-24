@@ -14,6 +14,7 @@
     </head>
     <body>
         {% block body %}{% endblock %}
+        {% set statsPath = app.user ? path('app_stats', {'id': app.user.id}) : path('app_home') %}
                 <nav class="bottom-menu">
             <a href="{{ path('app_logged_home') }}">
                 <img src="/img/icones/house-solid-full.svg" class="menu-icon" alt="Home icon">
@@ -21,7 +22,7 @@
             <a href="{{path('app_collection')}}">
                 <img src="/img/icones/book-solid-full.svg" class="menu-icon" alt="book icon">
             </a>
-            <a href="{{path('app_home')}}">
+            <a href="{{ statsPath }}">
                 <img src="/img/icones/chart-simple-solid-full.svg" class="menu-icon" alt="chart icon">
             </a>
             <a href="{{path('app_book_add')}}">
