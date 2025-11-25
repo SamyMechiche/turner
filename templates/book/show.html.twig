@@ -11,7 +11,7 @@
 
     @font-face {
         font-family: outfitR;
-        src: url("public/fonts/jeju/outfit/Outfit-Regular.ttf");
+        src: url("fonts/outfit/Outfit-Regular.ttf");
     }
 
     :root {
@@ -48,7 +48,7 @@
         color: var(--color-heading);
         text-decoration: none;
         font-family: jeju, serif;
-        font-size: 1rem;
+        font-size: 1.6rem;
         margin-bottom: 2rem;
         transition: opacity 0.2s;
     }
@@ -256,7 +256,7 @@
     }
 
     .note-content {
-        font-family: jeju, serif;
+        font-family: outfitR, sans-serif;
         font-size: 1rem;
         color: var(--color-heading);
         line-height: 1.6;
@@ -536,17 +536,15 @@
     }
 
     .remove-book-btn {
-        border: none;
-        background-color: transparent;
-        color: #d43f33;
+        background-color:rgb(202, 105, 100);
         font-family: outfitR, sans-serif;
         font-size: 0.9rem;
         cursor: pointer;
         padding: 0.5rem 0.75rem;
-        border-radius: 6px;
+        border: 2px solid #463F33;
+        border-radius: 3px;
         transition: background-color 0.2s ease;
-        text-decoration: underline;
-        text-underline-offset: 2px;
+        text-decoration: none;
     }
 
     .remove-book-btn:hover {
